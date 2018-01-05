@@ -252,4 +252,4 @@ def configure(env):
         env.android_add_to_manifest("android/AndroidManifestChunk.xml");
         env.android_add_to_permissions("android/AndroidPermissionsChunk.xml");
         env.android_add_default_config("minSdkVersion 15")
-        env.android_add_default_config("applicationId 'br.com.ciolfi.godotuno'")
+        env.android_add_default_config("applicationId 'com.your.appid'")
