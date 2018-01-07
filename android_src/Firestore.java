@@ -32,6 +32,7 @@ import android.support.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -44,6 +45,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import com.google.android.gms.tasks.*;
 
@@ -68,7 +71,15 @@ public class Firestore {
 
 		// Enable Firestore logging
 		FirebaseFirestore.setLoggingEnabled(true);
-		db = FirebaseFirestore.getInstance();
+        
+        db = FirebaseFirestore.getInstance();
+        
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+        .setPersistenceEnabled(false)
+        .build();
+        db.setFirestoreSettings(settings);
+    
+        listeners = new HashMap<String, ListenerRegistration>();
 
 		Utils.d("Firestore::Initialized");
 	}
@@ -143,7 +154,11 @@ public class Firestore {
 	}
     
     public void setListener(final String p_col_name, final String p_doc_name){
-        db.collection(p_col_name).document(p_doc_name).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        if (listeners.containsKey(p_doc_name)) {
+            Utils.d("Listener já existente!");
+            return;
+        }
+        listeners.put(p_doc_name,db.collection(p_col_name).document(p_doc_name).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
@@ -159,12 +174,22 @@ public class Firestore {
                     Utils.callScriptFunc("Firestore", "SnapshotData", "");
                 }
             }
-        });
+        }));
+    }
+    
+    public void removeListener(final String p_doc_name){
+        if (listeners.containsKey(p_doc_name)){
+            listeners.get(p_doc_name).remove();
+            listeners.remove(p_doc_name);
+            Utils.d("Listener removido!");
+        }
     }
 
 	private FirebaseFirestore db = null;
 	private static Activity activity = null;
 	private static Firestore mInstance = null;
+    
+    private static HashMap<String, ListenerRegistration> listeners = null;
 
 	private FirebaseApp mFirebaseApp = null;
 }

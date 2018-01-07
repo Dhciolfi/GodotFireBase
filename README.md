@@ -3,13 +3,9 @@ GodotFireBase é um módulo que permite a integração dos serviços do FireBase
 
 Adaptado de `https://github.com/FrogSquare/GodotFireBase`.
 
-[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://github.com/FrogSquare/GodotFireBase)
-[![GodotEngine](https://img.shields.io/badge/Godot_Engine-2.X%20/%203.X-blue.svg)](https://github.com/godotengine/godot)
-[![LICENCE](https://img.shields.io/badge/License-Apache_V2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-
 ## Depende De
 
-> Godot game engine (2.1.x/3.0): `git clone https://github.com/godotengine/godot`
+> Godot game engine (3.0): `git clone https://github.com/godotengine/godot`
 
 > GodotSQL: `git clone https://github.com/FrogSquare/GodotSQL`
 
@@ -174,6 +170,10 @@ from = "Firestore", key = "Documents"
 Setar listener em um documento:
 ```
 firebase.set_listener("nome_da_coleção", "nome_do_documento")
+```
+Remover listener de um documento:
+```
+firebase.remove_listener("nome_do_documento")
 ```
 Quando há uma modificação dos dados observados pelo listener, os mesmos são enviados em JSON para:
 ```
