@@ -781,10 +781,10 @@ public class FireBase extends Godot.SingletonBase {
 		});
     }
     
-    public void remove_listener(final String p_doc_name) {
+    public void remove_listener(final String p_col_name, final String p_doc_name) {
         activity.runOnUiThread(new Runnable() {
 			public void run() {
-				Firestore.getInstance(activity).removeListener(p_doc_name);
+				Firestore.getInstance(activity).removeListener(p_col_name, p_doc_name);
 			}
 		});
     }

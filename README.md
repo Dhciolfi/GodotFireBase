@@ -173,7 +173,7 @@ firebase.set_listener("nome_da_coleção", "nome_do_documento")
 ```
 Remover listener de um documento:
 ```
-firebase.remove_listener("nome_do_documento")
+firebase.remove_listener("nome_da_coleção", "nome_do_documento")
 ```
 Quando há uma modificação dos dados observados pelo listener, os mesmos são enviados em JSON para:
 ```

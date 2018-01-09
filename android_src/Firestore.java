@@ -154,11 +154,11 @@ public class Firestore {
 	}
     
     public void setListener(final String p_col_name, final String p_doc_name){
-        if (listeners.containsKey(p_doc_name)) {
+        if (listeners.containsKey(p_col_name + "/" + p_doc_name)) {
             Utils.d("Listener já existente!");
             return;
         }
-        listeners.put(p_doc_name,db.collection(p_col_name).document(p_doc_name).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        listeners.put(p_col_name + "/" + p_doc_name,db.collection(p_col_name).document(p_doc_name).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
@@ -177,10 +177,10 @@ public class Firestore {
         }));
     }
     
-    public void removeListener(final String p_doc_name){
-        if (listeners.containsKey(p_doc_name)){
-            listeners.get(p_doc_name).remove();
-            listeners.remove(p_doc_name);
+    public void removeListener(final String p_col_name, final String p_doc_name){
+        if (listeners.containsKey(p_col_name + "/" + p_doc_name)){
+            listeners.get(p_col_name + "/" + p_doc_name).remove();
+            listeners.remove(p_col_name + "/" + p_doc_name);
             Utils.d("Listener removido!");
         }
     }
