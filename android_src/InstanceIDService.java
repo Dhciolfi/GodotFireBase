@@ -14,10 +14,6 @@
  * limitations under the License.
  **/
 
-/**
- * Modified by Daniel Ciolfi <daniel.ciolfi@gmail.com>
- **/
-
 package org.godotengine.godot;
 
 import android.util.Log;
@@ -37,7 +33,7 @@ public class InstanceIDService extends FirebaseInstanceIdService {
 	public void onTokenRefresh() {
 		// Get updated InstanceID token.
 		String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-		Utils.d("Refreshed token: " + refreshedToken);
+		Utils.d("GodotFireBase", "Refreshed token: " + refreshedToken);
 
 		// If you want to send messages to this application instance or
 		// manage this apps subscriptions on the server side, send the
@@ -55,7 +51,7 @@ public class InstanceIDService extends FirebaseInstanceIdService {
 	*/
 	private void sendRegistrationToServer(String token) {
 		// TODO: Implement this method to send token to your app server.
-		Utils.d("Token: " + token);
+		Utils.d("GodotFireBase", "Token: " + token);
 	}
 
 }

@@ -46,7 +46,7 @@
 
 	<meta-data
 	android:name="com.google.firebase.messaging.default_notification_icon"
-	android:resource="@drawable/ic_stat_ic_notification" />
+	android:resource="@drawable/notification_small_icon" />
 
 	<!-- Set color used with incoming notification messages.
 	This is used when no color is set for the incoming
@@ -56,4 +56,8 @@
 	android:name="com.google.firebase.messaging.default_notification_color"
 	android:resource="@color/colorAccent" />
 	<!-- Notification -->
+
+    <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9937929046582037~3683055371"/>
 

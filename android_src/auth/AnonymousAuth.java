@@ -43,21 +43,24 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnonymousSignIn {
+public class AnonymousAuth {
 
-	public static AnonymousSignIn getInstance (Activity p_activity) {
+	public static AnonymousAuth getInstance (Activity p_activity) {
 		if (mInstance == null) {
-			mInstance = new AnonymousSignIn (p_activity);
+			mInstance = new AnonymousAuth(p_activity);
 		}
 
 		return mInstance;
 	}
 
-	public AnonymousSignIn (Activity p_activity) {
+	public AnonymousAuth(Activity p_activity) {
 		activity = p_activity;
 	}
 
-	public void init () {
+	public void init() {
+		// Initialize listener.
+		// ...
+
 		mAuth = FirebaseAuth.getInstance();
 		mAuthListener = new FirebaseAuth.AuthStateListener() {
 			@Override
@@ -66,53 +69,77 @@ public class AnonymousSignIn {
 
 				if (user != null) {
 					// User is signed in
-					Utils.d("Anonymous:onAuthStateChanged:signed_in:" + user.getUid());
+					Utils.d("GodotFireBase", 
+					"Anonymous:onAuthStateChanged:signed_in:" + user.getUid());
 
 					successSignIn(user);
 				} else {
 					// User is signed out
-					Utils.d("Anonymous:onAuthStateChanged:signed_out");
-                    
+					Utils.d("GodotFireBase", "Anonymous:onAuthStateChanged:signed_out");
 					successSignOut();
 				}
+
+				// update firebase auth dets.
 			}
 		};
-        
-        onStart();
+
+		onStart();
 	}
 
-	public void signIn () {
+	public void signIn() {
 		mAuth.signInAnonymously()
 		.addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
 			@Override
 			public void onComplete(@NonNull Task<AuthResult> task) {
 				if (task.isSuccessful()) {
 					//Sign in success, update with the signed-in user's information
-					Utils.d("Anonymous:SignIn:Success");
+					Utils.d("GodotFireBase", "Anonymous:SignIn:Success");
 				}
 			}
 
 		});
 	}
-    
-	public void signOut () {
+
+	public void signUp (final int authType) {
+/**
+		AuthCredential credential = GoogleAuthProvider.getCredential(googleIdToken, null);
+		AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+		AuthCredential credential = EmailAuthProvider.getCredential(email, password);
+
+		mAuth.getCurrentUser().linkWithCredential(credential)
+		.addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
+			@Override
+			public void onComplete(@NonNull Task<AuthResult> task) {
+				if (task.isSuccessful()) {
+
+				} else {
+
+				}
+
+				// ...
+			}
+		});
+**/
+	}
+
+	public void signOut() {
 		mAuth.signOut();
 	}
 
 	protected void successSignIn (FirebaseUser user) {
 		isAnonymousConnected = true;
-        
-        Utils.callScriptFunc("Auth", "login", "true");
 	}
 
 	protected void successSignOut () {
-		isAnonymousConnected = false;
-        
-        Utils.callScriptFunc("Auth", "login", "false");
+		isAnonymousConnected =false;
 	}
 
 	public boolean isConnected () {
 		return isAnonymousConnected;
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// ...
 	}
 
 	public void onStart () {
@@ -130,7 +157,7 @@ public class AnonymousSignIn {
 	}
 
 	private static Activity activity = null;
-	private static AnonymousSignIn mInstance = null;
+	private static AnonymousAuth mInstance = null;
 
 	private static boolean isAnonymousConnected = false;
 

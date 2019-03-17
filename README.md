@@ -1,66 +1,67 @@
 # GodotFireBase
-GodotFireBase é um módulo que permite a integração dos serviços do FireBase nos projetos desenvolvidos com a Godot.
+
+Godot_FireBase is a firebase integration for godot android;
 
 Adaptado de `https://github.com/FrogSquare/GodotFireBase`.
 
-## Depende De
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://github.com/FrogSquare/GodotFireBase)
+[![GodotEngine](https://img.shields.io/badge/Godot_Engine-2.X%20/%203.X-blue.svg)](https://github.com/godotengine/godot)
+[![LICENCE](https://img.shields.io/badge/License-Apache_V2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-> Godot game engine (3.0): `git clone https://github.com/godotengine/godot`
+# Depends on
+
+> Godot game engine: `git clone https://github.com/godotengine/godot`
 
 > GodotSQL: `git clone https://github.com/FrogSquare/GodotSQL`
 
-## Recursos Disponíveis
-> AdMob
+# Build/Compile module
 
-> Analytics
-
-> Authentication [W.I.P] Google, Facebook, Twitter, Email
-
-> Firebase Notification
-
-> RemoteConfig
-
-> Storage
-
-> Invites (Email & SMS)
-
-> Firestore (W.I.P)
-
-## Configurações Antes da Compilação
-
-Copie seu arquivo `google-services.json` para `[GODOT-ROOT]/platform/android/java/` e edite o arquivo `modules/FireBase/config.py`, substituindo `com.your.appid` pelo package do seu projeto.
+* Copy your `google-services.json` file to `[GODOT-ROOT]/platform/android/java/`
+* Edit file modules/FireBase/config.py at line 11
 
 ```
-env.android_add_default_config("applicationId 'com.your.appid'")
+p_app_id = "com.your.appid"     # config.py L:11
 ```
 
-Caso vá utilizar o RemoteConfigs, configure os parâmetros padrões no arquivo `.xml` que se encontra em `[GODOT-ROOT]/modules/FireBase/res/xml/remote_config_defaults.xml`.
+* Replay `com.your.appid` with you android application id.
 
-## Inicializando o Módulo
-Edite o arquivo `engine.cfg`, adicionando o seguinte código:
+*For customizing the module go [here](https://github.com/FrogSquare/GodotFireBase/wiki/Customize-GodotFireBase)*
+
+# FAQ
+
+**Should I rename the android_src folder after customization?**
+
+> No, After customization the folder used by the module will be `android`, And `android_src` folder will be a backup for future customization.
+
+# Initialize FireBase
+
+Edit engine.cfg and add
 
 ```
 [android]
 modules="org/godotengine/godot/FireBase,org/godotengine/godot/SQLBridge"
 ```
 
-## Referenciando e Inicializando
+RemoteConfigs default parameters `.xml` file is at `[GODOT-ROOT]/modules/FireBase/res/xml/remote_config_defaults.xml`
 
-### Na Godot 2.X
+# GDScript - getting module singleton and initializing;
+
+### On 2.X
 
 ```
 var firebase = Globals.get_singleton("FireBase");
 ```
 
-### Na Godot 3.X
+### On 3.X (latest from git)
 
 ```
 var firebase = Engine.get_singleton("FireBase");
 ```
 
-## Configurando
+For Analytics only `firebase.init("", get_instance_ID())` or to user RemoteConfig or Notifications (subscribing to topic)
 
-### Crie o arquivo `godot-firebase-config.json` com o conteúdo abaixo na pasta do seu projeto.
+# GodotFireBase: copy `godot-firebase-config.json` to your projects root directord.
+GodotFireBase config file, By default every feature is disabled.
 
 ```
 {
@@ -70,7 +71,7 @@ var firebase = Engine.get_singleton("FireBase");
 	"RemoteConfig" : true,
 	"Notification" : true,
 	"Storage" : true,
-	"FireStore" : true,
+	"Firestore" : true,
 
 	"AuthConf" : 
 	{
@@ -91,34 +92,30 @@ var firebase = Engine.get_singleton("FireBase");
 		"InterstitialAdId" : "",
 
 		"RewardedVideoAd" : true,
-		"RewardedVideoAdId" : ""
+		"RewardedVideoAdId" : "",
+
+        "TestAds" : false
 	}
 }
-
 ```
 
-Inicialize o módulo com o arquivo de configurações:
+And initialize firebase with file path, `RewardedVideoAdId` is a string array i.e `"string1,string2"`
 
 ```
 func _ready():
     if OS.get_name() == "Android":
-        firebase.initWithFile("res://godot-firebase-config.json", get_instance_ID());
-```
+        firebase.initWithFile("res://godot-firebase-config.json", get_instance_ID())
 
-## Recebendo mensagens do Java:
-Para receber dados do Java:
-```
 func _receive_message(tag, from, key, data):
     if tag == "FireBase":
-        if from == "<from>":
-            if key == "<key>":
-                print(data)
+        print("From: ", from, " Key: ", key, " Data: ", data)
 ```
 
-## FireBase Analytics
+# Using FireBase Analytics
+
 ```
-firebase.send_events("EventName", Dictionary);
-firebase.send_custom("TestKey", "SomeValue");
+firebase.send_events("EventName", Dictionary)
+firebase.send_custom("TestKey", "SomeValue")
 
 firebase.setScreenName("Screen_name")
 firebase.sendAchievement("someAchievementId")		# unlock achievement
@@ -134,165 +131,93 @@ firebase.tutorial_complete()				# tutorial end
 Reference: https://support.google.com/firebase/answer/6317494?hl=en
 ```
 
-## Disparando um AlertDialog
+# AlertDialog aditional
 
 ```
-firebase.alert("Message goes here..!");
+firebase.alert("Message goes here..!") # Show a simple AlertDialog
+firebase.set_debug(true) # Enable/Disable `GodotFireBase` debug messages
 ```
 
-## Firebase Firestore
+# Authentication
 
-### Escrever
-Adicionar dados a um documento: (os dados são substituídos)
-```
-firebase.set_document("nome_da_coleção", "nome_do_documento", dicionario)
-```
-Adicionar dados sem especificar o documento:
-```
-firebase.add_document("collection_name", dicionario)
-```
-Ambos retornam um bool indicando sucesso ou não para:
-```
-from = "Firestore", key = "DocumentAdded"
-```
-
-### Ler
-Carregar os documentos de uma coleção:
-```
-firebase.load_document("collection_name")
-```
-Retorna os documentos em JSON para:
-```
-from = "Firestore", key = "Documents"
-```
-
-### Listener
-Setar listener em um documento:
-```
-firebase.set_listener("nome_da_coleção", "nome_do_documento")
-```
-Remover listener de um documento:
-```
-firebase.remove_listener("nome_da_coleção", "nome_do_documento")
-```
-Quando há uma modificação dos dados observados pelo listener, os mesmos são enviados em JSON para:
-```
-from = "Firestore", key = "SnapshotData"
-```
-
-## Autenticação
-
-### Facebook
-
-Edite o arquivo `res/values/ids.xml` substituindo o `facebook_app_id` pelo id do seu app do Facebook.
-
-Sign In:
-```
-firebase.facebook_sign_in()
-```
-Sign Out:
-```
-firebase.facebook_sign_out()
-```
-Obter dados do usuário (nome, email e foto(uri)):
-```
-firebase.get_facebook_user()
-```
-Revogar acesso:
-```
-firebase.facebook_revoke_access();
-```
-Verificar se está conectado:
-```
-firebase.is_facebook_connected()
-```
-Permissões:
-```
-firebase.facebook_has_permission("publish_actions") // Checar se está permitido
-
-firebase.revoke_facebook_permission("publish_actions") // Revogar permissão
-
-firebase.ask_facebook_publish_permission("publish_actions"); // Pedir permissão de publish
-
-firebase.ask_facebook_read_permission("email"); // Pedir permissão de leitura
-
-firbase.get_facebook_permissions() // Listar permissões
-```
-
-### Google
-Sign In:
-```
-firebase.google_sign_in()
-```
-Sigh Out:
-```
-firebase.google_sign_out()
-```
-Obter dados do usuário (nome, email e foto(uri)):
-```
-var gUserDetails = firebase.get_google_user()
-```
-Revogar acesso:
-```
-firebase.google_revoke_access();
-```
-Verificar se está conectado:
-```
-firebase.is_google_connected()
-```
-
-### Email e Senha
-Sign In:
-```
-firebase.email_sign_in("email", "senha")
-```
-Sign Out:
-```
-firebase.email_sign_out()
-```
-Criar conta:
-```
-firebase.email_create_account("email", "senha")
-```
-Obter dados do usuário (email e user_id):
-```
-firebase.get_email_user()
-```
-Verificar se está conectado:
-```
-firebase.is_email_connected()
-```
-
-### Anônimo:
-Sign In:
-```
-firebase.anonymous_sign_in()
-```
-Sign Out:
-```
-firebase.anonymous_sign_out()
-```
-Verificar se está conectado:
-```
-firebase.is_anonymous_connected()
-```
-
-## Firebase Notification
+For Facebook edit `res/values/ids.xml` and replace facebook_app_id with your Facebook App Id
 
 ```
-firebase.subscribeToTopic("topic") // Subscribe to particular topic.
-firebase.getToken() // Get current client TokenID
+firebase.authConfig("'Google':true,'Facebook':true") # Configure Auth service
+
+firebase.google_sign_in() # Firebase connect to google.
+firebase.facebook_sign_in() # Firebase connect to facebook.
+firebase.twitter_sign_in() # Firebase connect to twitter.
+firebase.anonymous_sign_in() # Firebase connect anonymously.
+
+firebase.google_sign_out() # Firebase disconnect from google.
+firebase.facebook_sign_out() # Firebase disconnect from facebook.
+firebase.twitter_sign_out() # Firebase disconnect from twitter.
+firebase.anonymous_sign_out() # Firebase disconnect anonymously.
+
+var gUserDetails = firebase.get_google_user() # returns name, email_id, photo_uri
+var fbUserDetails = firebase.get_facebook_user() # returns name, email_id, photo_uri
+
+firebase.google_revoke_access()
+firebase.facebook_revoke_access()
+
+firebase.is_google_connected() # bool check for google authentication (google)
+firebase.is_facebook_connected() # bool check for facebook authentication (facebook)
+firebase.is_anonymous_connected() # bool check for facebook authentication (anonymous)
+```
+
+More for facebook permissions
+
+```
+firebase.facebook_has_permission("publish_actions") # Check for availabe permission
+
+firebase.revoke_facebook_permission("publish_actions") # revoke permission
+
+firebase.ask_facebook_publish_permission("publish_actions"); # asking write permission
+
+firebase.ask_facebook_read_permission("email"); # asking read only permission
+
+firbase.get_facebook_permissions() # getting available permissions
+```
+
+Recive message from java
+
+```
+func _receive_message(tag, from, key, data):
+    if tag == "FireBase":
+        if from == "Auth":
+            if key == "GoogleLogin" && data == "true": print("User Signed in.")
+            if key == "FacebookLogin" && data == "true": print("User Signed in.")
+```
+
+# Firebase Notification API
+
+```
+firebase.subscribeToTopic("topic") # Subscribe to particular topic.
+firebase.getToken() # Get current client TokenID
 
 If recived notifiction has a payload, it will be saved inside SQL Database under key: "firebase_notification_data"
 
-firebase.notifyInMins("message", 60) // Shedule notification in 60 min
+firebase.notifyInMins("message", 60) # Shedule notification in 60 min
+firebase.notifyInSecs("message", 3200) # Shedule notification in 3200 seconds
+
+var dict = {}
+dict["title"] = "Notification title"
+dict["message"] = "This is a text message"
+dict["image_uri"] = "res://big_image_in_notification_body.png"
+dict["type"] = "text"
+
+firebase.notifyOnComplete(dict, 3200) # Shedule notification in 3200 seconds
 ```
 
-## RemoteConfig API
+# RemoteConfig API
+
 ```
-firebase.getRemoteValue("remote_key") // Return String value
+firebase.getRemoteValue("remote_key") # Return String value
 ```
-## Configurando os Valores Padrões do RemoteConfig
+
+# Settings RemoteConfig default values
+
 ```
 var defs = Dictionary()
 defs["some_remoteconfig_key1"] = "remote_config_value1"
@@ -300,43 +225,51 @@ defs["some_remoteconfig_key2"] = "remote_config_value2"
 
 firebase.setRemoteDefaults(defs.to_json())
 ```
-Ou carregue por um arquivo JSON:
+
+OR load from json file
+
 ```
 firebase.setRemoteDefaultsFile("res://path/to/jsonfile.json")
 ```
 
-## Firebase Storage
+# Firebase Storage
 
 ```
-Upload Files from sdcard
-firebase.upload("images/file", "destFolder") // uploads file from sdcard to firebase
+# Upload Files from sdcard
+firebase.upload("images/file", "destFolder") # uploads file from sdcard to firebase
 
-Download Files from Firebase
-firebase.download("file", "images"); // Saves file from firebase to sdcard
+# Download Files from Firebase
+firebase.download("file", "images") # Saves file from firebase to sdcard
 ```
 
-## Firebase Invites
+# Firebase Invites
+
 ```
 Invite Friends with Email & SMS, DeepLink example: https://play.google.com/store/apps/details?id=[package-id].
 
-firebase.invite("message", "https://example.com/beed/link") // Send Firebase Invites.
-firebase.invite("message", "");  // Fallback to use default android share eg: Whatsapp, Twitter and more.
+firebase.invite("message", "https://example.com/beed/link") # Send Firebase Invites.
+firebase.invite("message", "")  # Fallback to use default android share eg: Whatsapp, Twitter and more.
 ```
 
-## Firebase AdMob
+# Firebase AdMob
+
 ```
-firebase.show_banner_ad(true)	// Show Banner Ad
-firebase.show_banner_ad(false)	// Hide Banner Ad
-firebase.set_banner_unitid("unit_id") // Change current Ad unit ID
+firebase.is_banner_loaded()     # Returns `true` if banner is loaded
+firebase.is_interstitial_loaded() # Returns `true` if interstitial is loaded
 
-firebase.show_interstitial_ad() // Show Interstitial Ad
-firebase.show_rewarded_video()	// Show Rewarded Video Ad
-firebase.show_rvideo("unit_id") // Show Rewarded Video Ad
+firebase.show_banner_ad(true)	# Show Banner Ad
+firebase.show_banner_ad(false)	# Hide Banner Ad
+firebase.set_banner_unitid("unit_id") # Change current Ad unit ID
 
-firebase.request_rewarded_video_status() // Request the rewarded video status
+firebase.show_interstitial_ad() # Show Interstitial Ad
+firebase.show_rewarded_video()	# Show Rewarded Video Ad
+firebase.show_rvideo("unit_id") # Show Rewarded Video Ad
+
+firebase.request_rewarded_video_status() # Request the rewarded video status
 ```
 
 AdMob Recive message from java
+
 ```
 func _receive_message(tag, from, key, data):
     if tag == "FireBase" and from == "AdMob":
@@ -360,13 +293,23 @@ func _receive_message(tag, from, key, data):
             print("Interstitial Status: ", data);
 ```
 
-## Atenção!
+# Firebase Firestore
 
-Quando for exportar não se esqueça de incluir os arquivos `*.json`:
+```
+firebase.add_document("collection_name", dict) # Auto created new Document under collection_name
+firebase.set_document("collection_name", "document_name", data) # Set document data, Data's are merged by default
+firebase.load_document("collection_name") # load or retrive from the server,
+
+# Note: documents will be sent to the `_receive_message` function as json
+```
+
+# Note
+
+While exporting, don't forget to add `*.json` under Resources tab,
 ![alt text](http://preview.ibb.co/fTwC8Q/Screenshot_from_2017_06_17_18_44_25.png)
 
-## Eventos de Log
-Utilize o comando abaixo para observar os logs emitidos pelo dispositivo:
+# Log Event
+
 ```
 adb -d logcat godot:V FireBase:V DEBUG:V AndroidRuntime:V ValidateServiceOp:V *:S
 ```

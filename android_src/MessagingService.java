@@ -14,16 +14,14 @@
  * limitations under the License.
  **/
 
-/**
- * Modified by Daniel Ciolfi <daniel.ciolfi@gmail.com>
- **/
-
 package org.godotengine.godot;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,18 +42,18 @@ import org.godotengine.godot.KeyValueStorage;
 
 public class MessagingService extends FirebaseMessagingService {
 
-	private static int NOTIFICATION_REQUEST_ID	= 9003;
+	private static int NOTIFICATION_REQUEST_ID	= 8001;
 
 	@Override
 	public void onMessageReceived(RemoteMessage remoteMessage) {
-		Utils.d("Message From: " + remoteMessage.getFrom());
-		Utils.d("Message From: " + remoteMessage.toString());
+		Utils.d("GodotFireBase", "Message From: " + remoteMessage.getFrom());
+		Utils.d("GodotFireBase", "Message From: " + remoteMessage.toString());
 
 		// Check if message contains a data payload.
 		if (remoteMessage.getData().size() > 0) {
 			Map<String, String> data = remoteMessage.getData();
 
-			Utils.d("Message data payload: " + data.toString());
+			Utils.d("GodotFireBase", "Message data payload: " + data.toString());
 
 			KeyValueStorage.set_context(this);
 			handleData(data);
@@ -63,7 +61,7 @@ public class MessagingService extends FirebaseMessagingService {
 
 		// Check if message contains a notification payload.
 		if (remoteMessage.getNotification() != null) {
-			Utils.d(
+			Utils.d("GodotFireBase", 
 			"Notification Body: " + remoteMessage.getNotification().getBody());
 
 			sendNotification(remoteMessage.getNotification().getBody(), this);
@@ -80,7 +78,7 @@ public class MessagingService extends FirebaseMessagingService {
 			for (Map.Entry<String, String> entry : data.entrySet()) {
 				jobject.put(entry.getKey(), entry.getValue());
 			}
-		} catch (JSONException e) { Utils.d("JSONException: parsing, " + e.toString()); }
+		} catch (JSONException e) { Utils.d("GodotFireBase", "JSONException: parsing, " + e.toString()); }
 
 		if (jobject.length() > 0) {
 			KeyValueStorage.setValue("firebase_notification_data", jobject.toString());
@@ -88,6 +86,10 @@ public class MessagingService extends FirebaseMessagingService {
 	}
 
 	public static void sendNotification(Bundle bundle, Context context) {
+        if (bundle.getString("image_uri") == null) {
+            sendNotification(bundle.getString("message"), context);
+        }
+
 		Intent intent = new Intent(context, org.godotengine.godot.Godot.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -97,11 +99,19 @@ public class MessagingService extends FirebaseMessagingService {
 		Uri defaultSoundUri =
 		RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
+        Bitmap large_icon;
+        if (bundle.get("larget_icon") != null) {
+			large_icon = Utils.getBitmapFromAsset(context, bundle.getString("large_icon"));
+        } else {
+            large_icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon);
+        }
+
 		NotificationCompat.Builder nBuilder = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.ic_stat_ic_notification)
+        .setLargeIcon(large_icon)
+		.setSmallIcon(R.drawable.notification_small_icon)
 		.setContentTitle(bundle.getString("title"))
 		.setStyle(new NotificationCompat.BigPictureStyle()
-				.bigPicture(Utils.getBitmapFromAsset(context, bundle.getString("image"))))
+				.bigPicture(Utils.getBitmapFromAsset(context, bundle.getString("image_uri"))))
 		.setAutoCancel(true)
 		.setSound(defaultSoundUri)
 		.setContentIntent(pendingIntent);
@@ -123,7 +133,8 @@ public class MessagingService extends FirebaseMessagingService {
 		RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
 		NotificationCompat.Builder nBuilder = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.ic_stat_ic_notification)
+        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.icon))
+		.setSmallIcon(R.drawable.notification_small_icon)
 		.setContentTitle(context.getString(R.string.godot_project_name_string))
 		.setContentText(messageBody)
 		.setAutoCancel(true)

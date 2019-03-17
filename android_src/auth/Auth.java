@@ -37,7 +37,7 @@ public class Auth {
 	public static final int GOOGLE_AUTH 	= 0x0003;
 	public static final int FACEBOOK_AUTH	= 0x0004;
 	public static final int TWITTER_AUTH	= 0x0005;
-	public static final int EMAIL_AUTH	    = 0x0006;
+	public static final int EMAIL_AUTH	= 0x0006;
 	public static final int ANONYMOUS_AUTH	= 0x0007;
 
 	public static Auth getInstance (Activity p_activity) {
@@ -58,7 +58,7 @@ public class Auth {
 
 	public void configure (final String configData) {
 		try { config = new JSONObject(configData); }
-		catch (JSONException e) { Utils.d("JSONException, parse error: " + e.toString()); }
+		catch (JSONException e) { Utils.d("GodotFireBase", "JSONException, parse error: " + e.toString()); }
 
 		//AuthGoogle++
 		if (config.optBoolean("Google", false)) {
@@ -80,97 +80,97 @@ public class Auth {
         
         //AuthAnonymous++
         if (config.optBoolean("Anonymous", false)) {
-            AnonymousSignIn.getInstance(activity).init();
+            AnonymousAuth.getInstance(activity).init();
         }
         //AuthAnonymous--
         
-        //AuthEmailPassword++
+        //AuthEmailAndPassword++
         if (config.optBoolean("EmailPassword", false)) {
-            EmailPasswordSignIn.getInstance(activity).init();
+            EmailAndPassword.getInstance(activity).init();
         }
-        //AuthEmailPassword++
+        //AuthEmailAndPassword++
 	}
 
 	public void sign_in (final int type_id, final String... args) {
 		if (!isInitialized()) { return; }
 
-		Utils.d("Auth:SignIn:TAG:" + type_id);
+		Utils.d("GodotFireBase", "Auth:SignIn:TAG:" + type_id);
 
 		switch (type_id) {
 			//AuthGoogle++
 			case GOOGLE_AUTH:
-				Utils.d("Auth:Google:SignIn");
+				Utils.d("GodotFireBase", "Auth:Google:SignIn");
 				GoogleSignIn.getInstance(activity).signIn();
 				break;
 			//AuthGoogle--
 			//AuthFacebook++
 			case FACEBOOK_AUTH:
-				Utils.d("Auth:Facebook:SignIn");
+				Utils.d("GodotFireBase", "Auth:Facebook:SignIn");
 				FacebookSignIn.getInstance(activity).signIn();
 				break;
 			//AuthFacebook--
 			//AuthTwitter++
 			case TWITTER_AUTH:
-				Utils.d("Auth:Twitter:SignIn");
+				Utils.d("GodotFireBase", "Auth twitter sign in");
 				TwitterSignIn.getInstance(activity).signIn();
 				break;
 			//AuthTwitter--
             //AuthAnonymous++
 			case ANONYMOUS_AUTH:
-				Utils.d("Auth:Anonymous:SignIn");
-				AnonymousSignIn.getInstance(activity).signIn();
+				Utils.d("GodotFireBase", "Auth:Anonymous:SignIn");
+				AnonymousAuth.getInstance(activity).signIn();
 				break;
             //AuthAnonymous--
-            //AuthEmailPassword++ 
+            //AuthEmailAndPassword++ 
             case EMAIL_AUTH:
-                Utils.d("Auth:EmailPassword:SignIn");
-                EmailPasswordSignIn.getInstance(activity).signIn(args[0], args[1]);
+                Utils.d("GodotFireBase", "Auth:EmailAndPassword:SignIn");
+                EmailAndPassword.getInstance(activity).signIn(args[0], args[1]);
                 break;
-            //AuthEmailPassword--
+            //AuthEmailAndPassword--
 			default:
-				Utils.d("Auth:Type:NotAvailable");
+				Utils.d("GodotFireBase", "Auth:Type:NotAvailable");
 				break;
 		}
 	}
-    
+
 	public void sign_out (final int type_id) {
 		if (!isInitialized()) { return; }
 
-		Utils.d("Auth:SignOut:TAG:" + type_id);
+		Utils.d("GodotFireBase", "Auth:SignOut:TAG:" + type_id);
 
 		switch (type_id) {
 			//AuthGoogle++
 			case GOOGLE_AUTH:
-				Utils.d("Auth:Google:SignOut");
+				Utils.d("GodotFireBase", "Auth:Google:SignOut");
 				GoogleSignIn.getInstance(activity).signOut();
 				break;
 			//AuthGoogle--
 			//AuthFacebook++
 			case FACEBOOK_AUTH:
-				Utils.d("Auth:Facebook:SignOut");
+				Utils.d("GodotFireBase", "Auth:Facebook:SignOut");
 				FacebookSignIn.getInstance(activity).signOut();
 				break;
 			//AuthFacebook--
 			//AuthTwitter++
 			case TWITTER_AUTH:
-				Utils.d("Auth:Twitter:SignOut");
+				Utils.d("GodotFireBase", "Auth twitter sign out");
 				TwitterSignIn.getInstance(activity).signOut();
 				break;
 			//AuthTwitter--
 			//AuthAnonymous++
 			case ANONYMOUS_AUTH:
-				Utils.d("Auth:Anonymous:SignOut");
-				AnonymousSignIn.getInstance(activity).signOut();
+				Utils.d("GodotFireBase", "Auth:Anonymous:SignOut");
+				AnonymousAuth.getInstance(activity).signOut();
 				break;
             //AuthAnonymous--
-            //AuthEmailPassword++
+            //AuthEmailAndPassword++
             case EMAIL_AUTH:
-                Utils.d("Auth:Anonymous:SignOut");
-				EmailPasswordSignIn.getInstance(activity).signOut();
+                Utils.d("GodotFireBase", "Auth:Anonymous:SignOut");
+				EmailAndPassword.getInstance(activity).signOut();
 				break;
-            //AuthEmailPassword--
+            //AuthEmailAndPassword--
 			default:
-				Utils.d("Auth:Type:NotAvailable.");
+				Utils.d("GodotFireBase", "Auth:Type:NotAvailable.");
 				break;
 		}
 	}
@@ -178,31 +178,34 @@ public class Auth {
     public void create_account (final int type_id, final String... args) {
         if (!isInitialized()) { return; }
         
-        Utils.d("Auth:CreateAccount:TAG:" + type_id);
+        Utils.d("GodotFireBase", "Auth:CreateAccount:TAG:" + type_id);
         
-        EmailPasswordSignIn.getInstance(activity).createAccount(args[0], args[1]);
+        EmailAndPassword.getInstance(activity).createAccount(args[0], args[1]);
     }
 
 	public void revoke(final int type_id) {
 		if (!isInitialized()) { return; }
 
-		Utils.d("FB:Auth:Revoke:" + type_id);
+		Utils.d("GodotFireBase", "FB:Auth:Revoke:" + type_id);
 
 		switch (type_id) {
 			//AuthGoogle++
 			case GOOGLE_AUTH:
-				Utils.d("FB:Revoke:Google");
+				Utils.d("GodotFireBase", "FB:Revoke:Google");
 				GoogleSignIn.getInstance(activity).revokeAccess();
 				break;
 			//AuthGoogle--
 			//AuthFacebook++
 			case FACEBOOK_AUTH:
-				Utils.d("FB:Revoke:Facebook");
+				Utils.d("GodotFireBase", "FB:Revoke:Facebook");
 				FacebookSignIn.getInstance(activity).revokeAccess();
 				break;
 			//AuthFacebook--
+			case ANONYMOUS_AUTH:
+				Utils.d("GodotFireBase", "FB:Revoke:Anonymous");
+				break;
 			default:
-				Utils.d("FB:Auth:Type:NotFound");
+				Utils.d("GodotFireBase", "FB:Auth:Type:NotFound");
 		}
 
 	}
@@ -210,7 +213,7 @@ public class Auth {
 	public void signUp(final int type_id) {
 		if (!isInitialized()) { return; }
 
-		Utils.d("Auth:Linking:" + type_id);
+		Utils.d("GodotFireBase", "Auth:Linking:" + type_id);
 /**
 		TODO: Signup/LinkAccount from Anonymous account.
 **/
@@ -222,7 +225,7 @@ public class Auth {
 		if (!isInitialized()) { return null; }
 
 		FirebaseUser ret = FirebaseAuth.getInstance().getCurrentUser();
-		if (ret == null) { Utils.d("Auth:UserNotSignedIn"); }
+		if (ret == null) { Utils.d("GodotFireBase", "Auth:UserNotSignedIn"); }
 
 		return ret;
 	}
@@ -230,28 +233,28 @@ public class Auth {
 	public String getUserDetails(final int type_id) {
 		if (!isInitialized()) { return "NULL"; }
 
-		Utils.d("UserDetails:TAG:" + type_id);
+		Utils.d("GodotFireBase", "UserDetails:TAG:" + type_id);
 
 		//AuthGoogle++
 		if (type_id == GOOGLE_AUTH && GoogleSignIn.getInstance(activity).isConnected()) {
-			Utils.d("Getting Google user details");
+			Utils.d("GodotFireBase", "Getting Google user details");
 			return GoogleSignIn.getInstance(activity).getUserDetails();
 		}
 		//AuthGoogle--
 
 		//AuthFacebook++
 		if (type_id == FACEBOOK_AUTH && FacebookSignIn.getInstance(activity).isConnected()) {
-			Utils.d("Getting Facebook user details");
+			Utils.d("GodotFireBase", "Getting Facebook user details");
 			return FacebookSignIn.getInstance(activity).getUserDetails();
 		}
 		//AuthFacebook--
         
-        //AuthEmailPassword++
-		if (type_id == EMAIL_AUTH && EmailPasswordSignIn.getInstance(activity).isConnected()) {
-			Utils.d("Getting Email user details");
-			return EmailPasswordSignIn.getInstance(activity).getUserDetails();
+        //AuthEmailAndPassword++
+		if (type_id == EMAIL_AUTH && EmailAndPassword.getInstance(activity).isConnected()) {
+			Utils.d("GodotFireBase", "Getting Email user details");
+			return EmailAndPassword.getInstance(activity).getUserDetails();
 		}
-		//AuthEmailPassword--
+		//AuthEmailAndPassword--
 
 		return "NULL";
 	}
@@ -268,7 +271,7 @@ public class Auth {
 	public void revokeFacebookPermission(final String permission) {
 		if (!isInitialized() && !isConnected(FACEBOOK_AUTH)) { return; }
 
-		Utils.d("Auth:Ask:RevokePermission: " + permission);
+		Utils.d("GodotFireBase", "Auth:Ask:RevokePermission: " + permission);
 		FacebookSignIn.getInstance(activity).revokePermission(permission);
 	}
 
@@ -276,53 +279,53 @@ public class Auth {
 	final String title, final String message, final String permission, final boolean read) {
 		if (!isInitialized() && !isConnected(FACEBOOK_AUTH)) { return; }
 
-		Utils.d("Auth:Ask:Permission: " + permission);
+		Utils.d("GodotFireBase", "Auth:Ask:Permission: " + permission);
 		FacebookSignIn.getInstance(activity)
 		.askForPermission(title, message, permission, read);
 	}
 	//AuthFacebook--
 
 	public boolean isConnected(final int type_id) {
-		Utils.d("Auth:Getting:Status");
+		Utils.d("GodotFireBase", "Auth:Getting:Status");
 
 		switch (type_id) {
 			//AuthGoogle++
 			case GOOGLE_AUTH:
-				Utils.d("Auth:Status:Google");
+				Utils.d("GodotFireBase", "Auth:Status:Google:True");
 				return GoogleSignIn.getInstance(activity).isConnected();
 			//AuthGoogle--
 			//AuthFacebook++
 			case FACEBOOK_AUTH:
-				Utils.d("Auth:Status:Facebook");
+				Utils.d("GodotFireBase", "Auth:Status:Facebook:True");
 				return FacebookSignIn.getInstance(activity).isConnected();
 			//AuthFacebook--
 			//AuthAnonymous++
 			case ANONYMOUS_AUTH:
-				Utils.d("Auth:Status:Anonymous");
-				return AnonymousSignIn.getInstance(activity).isConnected();
+				Utils.d("GodotFireBase", "Auth:Status:Anonymous");
+				return AnonymousAuth.getInstance(activity).isConnected();
             //AuthAnonymous--
-            //AuthEmailPassword++
+            //AuthEmailAndPassword++
             case EMAIL_AUTH:
-                Utils.d("Auth:Status:EmailPassword");
-				return EmailPasswordSignIn.getInstance(activity).isConnected();
-            //AuthEmailPassword--
+                Utils.d("GodotFireBase", "Auth:Status:EmailAndPassword");
+				return EmailAndPassword.getInstance(activity).isConnected();
+            //AuthEmailAndPassword--
 			default:
-				Utils.d("Auth:Type:NotAvailable");
+				Utils.d("GodotFireBase", "Auth:Type:NotAvailable");
 				break;
 		}
 
-		Utils.d("Auth:Status:False");
+		Utils.d("GodotFireBase", "Auth:Status:False");
 		return false;
 	}
 
 	private boolean isInitialized() {
 		if (mFirebaseApp == null) {
-			Utils.d("FireBase Auth, not initialized");
+			Utils.d("GodotFireBase", "FireBase Auth, not initialized");
 			return false;
 		}
 
 		if (config == null) {
-			Utils.d("FireBase Auth, not Configured");
+			Utils.d("GodotFireBase", "FireBase Auth, not Configured");
 			return false;
 		}
 
@@ -377,16 +380,15 @@ public class Auth {
         
         //AuthAnonymous++
 		if (config.optBoolean("Anonymous", false)) {
-			AnonymousSignIn.getInstance(activity).onStart();
+			AnonymousAuth.getInstance(activity).onStart();
 		}
 		//AuthAnonymous--
         
-        //AuthEmailPassword++
-		if (config.optBoolean("EmailPassword", false)) {
-			EmailPasswordSignIn.getInstance(activity).onStart();
+        //AuthEmailAndPassword++
+		if (config.optBoolean("EmailAndPassword", false)) {
+			EmailAndPassword.getInstance(activity).onStart();
 		}
-		//AuthEmailPassword--
-
+		//AuthEmailAndPassword--
 	}
 
 	public void onPause() {
@@ -417,18 +419,17 @@ public class Auth {
 			TwitterSignIn.getInstance(activity).onStop();
 		}
 		//AuthTwitter--
-        
         //AuthAnonymous++
 		if (config.optBoolean("Anonymous", false)) {
-			AnonymousSignIn.getInstance(activity).onStop();
+			AnonymousAuth.getInstance(activity).onStop();
 		}
 		//AuthAnonymous--
         
-        //AuthEmailPassword++
-		if (config.optBoolean("EmailPassword", false)) {
-			EmailPasswordSignIn.getInstance(activity).onStop();
+        //AuthEmailAndPassword++
+		if (config.optBoolean("EmailAndPassword", false)) {
+			EmailAndPassword.getInstance(activity).onStop();
 		}
-		//AuthEmailPassword--
+		//AuthEmailAndPassword--
 	}
 
 	private static Activity activity = null;

@@ -71,21 +71,21 @@ public class Firestore {
 
 		// Enable Firestore logging
 		FirebaseFirestore.setLoggingEnabled(true);
-        
-        db = FirebaseFirestore.getInstance();
+		db = FirebaseFirestore.getInstance();
         
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-        .setPersistenceEnabled(false)
-        .build();
+            .setPersistenceEnabled(false)
+            .build();
+        
         db.setFirestoreSettings(settings);
     
         listeners = new HashMap<String, ListenerRegistration>();
 
-		Utils.d("Firestore::Initialized");
+		Utils.d("GodotFireBase", "Firestore::Initialized");
 	}
 
-	public void loadDocuments (final String p_name) {
-		Utils.d("Firestore::LoadData");
+	public void loadDocuments (final String p_name, final int callback_id) {
+		Utils.d("GodotFireBase", "Firestore::LoadData");
 
 		db.collection(p_name).get()
 		.addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -95,26 +95,37 @@ public class Firestore {
 					JSONObject jobject = new JSONObject();
 
 					try {
+	    				JSONObject jobject_1 = new JSONObject();
+
 						for (DocumentSnapshot document : task.getResult()) {
-							jobject.put(
-							document.getId(), document.getData());
+							jobject_1.put(document.getId(), new JSONObject(document.getData()));
 						}
 
-						Utils.d("Data: " + jobject.toString());
-						Utils.callScriptFunc(
-						"Firestore", "Documents", jobject.toString());
+                        jobject.put(p_name, jobject_1);
 					} catch (JSONException e) {
-						Utils.d("JSON Exception: " + e.toString());
+						Utils.d("GodotFireBase", "JSON Exception: " + e.toString());
 					}
+
+                    
+			    	Utils.d("GodotFireBase", "Data: " + jobject.toString());
+
+                    if (callback_id == -1) {
+    					Utils.callScriptFunc(
+                                "Firestore", "Documents", jobject.toString());
+                    } else {
+  						Utils.callScriptFunc(
+                                callback_id, "Firestore", "Documents", jobject.toString());
+                    }
+
 				} else {
-					Utils.w("Error getting documents: " + task.getException());
+					Utils.w("GodotFireBase", "Error getting documents: " + task.getException());
 				}
 			}
 		});
 	}
 
 	public void addDocument (final String p_name, final Dictionary p_dict) {
-		Utils.d("Firestore::AddData");
+		Utils.d("GodotFireBase", "Firestore::AddData");
 
 		// Add a new document with a generated ID
 		db.collection(p_name)
@@ -122,13 +133,13 @@ public class Firestore {
 		.addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
 			@Override
 			public void onSuccess(DocumentReference documentReference) {
-				Utils.d("DocumentSnapshot added with ID: " + documentReference.getId());
+				Utils.d("GodotFireBase", "DocumentSnapshot added with ID: " + documentReference.getId());
 				Utils.callScriptFunc("Firestore", "DocumentAdded", true);
 			}
 		}).addOnFailureListener(new OnFailureListener() {
 			@Override
 			public void onFailure(@NonNull Exception e) {
-				Utils.w("Error adding document: " + e);
+				Utils.w("GodotFireBase", "Error adding document: " + e);
 				Utils.callScriptFunc("Firestore", "DocumentAdded", false);
 			}
 		});
@@ -136,17 +147,17 @@ public class Firestore {
 
 	public void setData(final String p_col_name, final String p_doc_name, final Dictionary p_dict) {
 		db.collection(p_col_name).document(p_doc_name)
-		.set(p_dict) // , SetOptions.merge()
+		.set(p_dict, SetOptions.merge())
 		.addOnSuccessListener(new OnSuccessListener<Void>() {
 			@Override
 			public void onSuccess(Void aVoid) {
-				Utils.d("DocumentSnapshot successfully written!");
+				Utils.d("GodotFireBase", "DocumentSnapshot successfully written!");
 				Utils.callScriptFunc("Firestore", "DocumentAdded", true);
 			}
 		}).addOnFailureListener(new OnFailureListener() {
 			@Override
 			public void onFailure(@NonNull Exception e) {
-				Utils.w("Error adding document: " + e);
+				Utils.w("GodotFireBase", "Error adding document: " + e);
 				Utils.callScriptFunc("Firestore", "DocumentAdded", false);
 			}
 		});
@@ -155,22 +166,22 @@ public class Firestore {
     
     public void setListener(final String p_col_name, final String p_doc_name){
         if (listeners.containsKey(p_col_name + "/" + p_doc_name)) {
-            Utils.d("Listener já existente!");
+            Utils.d("GodotFireBase", "Listener já existente!");
             return;
         }
         listeners.put(p_col_name + "/" + p_doc_name,db.collection(p_col_name).document(p_doc_name).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
-                    Utils.w("Error seting listener: " + e);
+                    Utils.w("GodotFireBase", "Error seting listener: " + e);
                     return;
                 }
 
                 if (snapshot != null && snapshot.exists()) {
-                    Utils.d("Current data: " + snapshot.getData());
+                    Utils.d("GodotFireBase", "Current data: " + snapshot.getData());
                     Utils.callScriptFunc("Firestore", "SnapshotData", new JSONObject(snapshot.getData()).toString());
                 } else {
-                    Utils.d("Current data: null");
+                    Utils.d("GodotFireBase", "Current data: null");
                     Utils.callScriptFunc("Firestore", "SnapshotData", "");
                 }
             }
@@ -181,13 +192,15 @@ public class Firestore {
         if (listeners.containsKey(p_col_name + "/" + p_doc_name)){
             listeners.get(p_col_name + "/" + p_doc_name).remove();
             listeners.remove(p_col_name + "/" + p_doc_name);
-            Utils.d("Listener removido!");
+            Utils.d("GodotFireBase", "Listener removido!");
         }
     }
 
 	private FirebaseFirestore db = null;
 	private static Activity activity = null;
 	private static Firestore mInstance = null;
+
+    private int script_callback_id = -1;
     
     private static HashMap<String, ListenerRegistration> listeners = null;
 

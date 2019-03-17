@@ -35,21 +35,24 @@ import org.json.JSONException;
 
 import org.godotengine.godot.Utils;
 
-public class EmailPasswordSignIn {
+public class EmailAndPassword {
 
-	public static EmailPasswordSignIn getInstance (Activity p_activity) {
+	public static EmailAndPassword getInstance (Activity p_activity) {
 		if (mInstance == null) {
-			mInstance = new EmailPasswordSignIn (p_activity);
+			mInstance = new EmailAndPassword(p_activity);
 		}
 
 		return mInstance;
 	}
 
-	public EmailPasswordSignIn (Activity p_activity) {
+	public EmailAndPassword(Activity p_activity) {
 		activity = p_activity;
 	}
 
 	public void init() {
+		// Initialize listener.
+		// ...
+
 		mAuth = FirebaseAuth.getInstance();
 
 		mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -58,52 +61,52 @@ public class EmailPasswordSignIn {
 			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
 				FirebaseUser user = firebaseAuth.getCurrentUser();
 				if (user != null) {
-					Utils.d("E&P:onAuthStateChanged:signed_in:" + user.getUid());
+					Utils.d("GodotFireBase", "E&P:onAuthStateChanged:signed_in:" + user.getUid());
 					successSignIn(user);
 				} else {
 					// User is signed out
-					Utils.d("E&P:onAuthStateChanged:signed_out");
+					Utils.d("GodotFireBase", "E&P:onAuthStateChanged:signed_out");
 					successSignOut();
 				}
+
+				// update user details;
 			}
 		};
-        
-        onStart();
 	}
 
 	public void createAccount(final String email, final String password) {
-		Utils.d("E&P:CreateAccount:" + email);
+		Utils.d("GodotFireBase", "E&P:CreateAccount:" + email);
 
 		mAuth.createUserWithEmailAndPassword(email, password)
 		.addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
 			@Override
 			public void onComplete(@NonNull Task<AuthResult> task) {
-				Utils.d("E&P:CreateUserWithEmail:onComplete:" + task.isSuccessful());
+				Utils.d("GodotFireBase", "E&P:CreateUserWithEmail:onComplete:" + task.isSuccessful());
+
+				// If sign in fails, display a message to the user. If sign in succeeds
+				// the auth state listener will be notified and logic to handle the
+				// signed in user can be handled in the listener.
 
 				if (!task.isSuccessful()) {
-					Utils.d("E&P:CreateAccount:Error:"  + task.getException());
-                    Utils.callScriptFunc("E&P", "CreateAccount", false);
-				} else {
-                    Utils.d("E&P:CreateAccount:Complete");
-                    Utils.callScriptFunc("E&P", "CreateAccount", true);
-                }
+					Utils.d("GodotFireBase", "E&P:CreateAccount:Error");
+				}
 			}
 		});
 	}
 
 	public void signIn(final String email, final String password) {
-        Utils.d("E&P:SignIn:" + email);
+        Utils.d("GodotFireBase", "E&P:SignIn:" + email);
         
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Utils.d("E&P:SignIn:Sucess");
+                    Utils.d("GodotFireBase", "E&P:SignIn:Sucess");
                     FirebaseUser user = mAuth.getCurrentUser();
                     successSignIn(user);
                 } else {
-                    Utils.d("E&P:SignIn:Error:" + task.getException());
+                    Utils.d("GodotFireBase", "E&P:SignIn:Error:" + task.getException());
                     Utils.callScriptFunc("E&P", "SignIn", false);
                 }
             }
@@ -117,20 +120,20 @@ public class EmailPasswordSignIn {
 	}
 
 	private void successSignIn(FirebaseUser user) {
-		Utils.d("E&P:SignIn:Success");
+		Utils.d("GodotFireBase", "E&P:SignIn:Success");
         
         isEmailConnected = true;
         
         try {
 			currentEmailUser.put("email", user.getEmail());
 			currentEmailUser.put("uid", user.getUid());
-		} catch (JSONException e) { Utils.d("Email:JSON:Error:" + e.toString()); }
+		} catch (JSONException e) { Utils.d("GodotFireBase", "Email:JSON:Error:" + e.toString()); }
 
 		Utils.callScriptFunc("Auth", "EmailLogin", true);
 	}
     
     private void successSignOut() {
-        Utils.d("E&P:SignOut:Success");
+        Utils.d("GodotFireBase", "E&P:SignOut:Success");
         
         isEmailConnected = false;
         
@@ -157,11 +160,13 @@ public class EmailPasswordSignIn {
 	}
 
 	private static Activity activity = null;
-	private static EmailPasswordSignIn mInstance = null;
+	private static EmailAndPassword mInstance = null;
+
+	private FirebaseAuth mAuth;
+	private FirebaseAuth.AuthStateListener mAuthListener;
     
     private static boolean isEmailConnected = false;
     private JSONObject currentEmailUser = new JSONObject();
 
-	private FirebaseAuth mAuth;
-	private FirebaseAuth.AuthStateListener mAuthListener;
+	private JSONObject currentEPUser = new JSONObject();
 }
